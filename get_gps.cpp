@@ -7,6 +7,7 @@
 #include <future>
 #include <memory>
 #include <thread>
+#include "./test/conv.hpp"
 
 using namespace mavsdk;
 using std::chrono::seconds;
@@ -55,6 +56,7 @@ int main(int argc, char** argv)
     }
 
     Mavsdk mavsdk;
+    Converter::Conv conv;
     ConnectionResult connection_result = mavsdk.add_any_connection(argv[1]);
 
     if (connection_result != ConnectionResult::Success) {
@@ -72,17 +74,26 @@ int main(int argc, char** argv)
     auto action = Action{system};
 
     const auto set_rate_result = telemetry.set_rate_position(1.0);
-    if (set_rate_result != Telemetry::Result::Success) {
-        std::cerr << "Setting rate failed: " << set_rate_result << '\n';
-        return 1;
-    }
 
-    telemetry.subscribe_position([](Telemetry::Position position) {
+    conv.initialize(0.0, 0.0, 0.0);
+    
+    double north, east, down;
+
+    telemetry.subscribe_position([&conv, &north, &east, &down](Telemetry::Position position) {
         std::cout << position.latitude_deg << "deg" << '\n';
         std::cout << position.longitude_deg << "deg" << '\n';
+        std::cout << position.relative_altitude_m << "deg" << '\n';
+
+        conv.geodetic2Ned(position.latitude_deg, position.longitude_deg, position.relative_altitude_m, &north, &east, &down);
+
+        std::cout<<"north: "<<north<<'m'<<' '<<"east: "<<east<<'m'<<' '<<"down: "<<down<<'m'<<'\n';
     });
 
-    std::cout << "Finished...\n";
+    // Check until vehicle is ready to arm
+    while (telemetry.health_all_ok() != true) {
+        std::cout << "Vehicle is getting ready to arm\n";
+        sleep_for(seconds(1));
+    }
 
     return 0;
 }

@@ -10,6 +10,13 @@ add_executable(get_gps
 )
 
 find_package(MAVSDK REQUIRED)
+find_package(Eigen3 3.3.4 REQUIRED NO_MODULE)
+
+SET( EIGEN3_INCLUDE_DIR "/usr/include/eigen3/" )
+IF( NOT EIGEN3_INCLUDE_DIR )
+    MESSAGE( FATAL_ERROR "Please point the environment variable EIGEN3_INCLUDE_DIR to the include directory of your Eigen3 installation.")
+ENDIF()
+INCLUDE_DIRECTORIES ( "${EIGEN3_INCLUDE_DIR}" )
 
 target_link_libraries(get_gps
     MAVSDK::mavsdk
