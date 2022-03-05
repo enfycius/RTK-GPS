@@ -6,13 +6,13 @@
 
 #IncludeRegexTransform: 
 
-/home/com/Documents/rtk-gps/./test/conv.hpp
+/home/hexk/Downloads/RTK-GPS/./test/conv.hpp
 math.h
 -
 Eigen/Dense
 -
 
-/home/com/Documents/rtk-gps/get_gps.cpp
+/home/hexk/Downloads/RTK-GPS/get_gps.cpp
 chrono
 -
 cstdint
@@ -31,24 +31,8 @@ memory
 -
 thread
 -
-cstdio
--
-cstdlib
--
-cstring
--
-unistd.h
--
-sys/types.h
--
-sys/socket.h
--
-netinet/in.h
--
-netdb.h
--
 ./test/conv.hpp
-/home/com/Documents/rtk-gps/./test/conv.hpp
+/home/hexk/Downloads/RTK-GPS/./test/conv.hpp
 
 /usr/include/eigen3/Eigen/Cholesky
 Core

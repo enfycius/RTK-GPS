@@ -7,26 +7,11 @@
 #include <future>
 #include <memory>
 #include <thread>
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <netdb.h>
 #include "./test/conv.hpp"
-
-#define BUFSIZE 1024
 
 using namespace mavsdk;
 using std::chrono::seconds;
 using std::this_thread::sleep_for;
-
-void error(char *msg) {
-    perror(msg);
-    exit(0);
-}
 
 void usage(const std::string& bin_name)
 {
@@ -65,32 +50,6 @@ std::shared_ptr<System> get_system(Mavsdk& mavsdk)
 
 int main(int argc, char** argv)
 {
-    int sockfd, portno, n;
-    int serverlen;
-    struct sockaddr_in serveraddr;
-    struct hostent *server;
-    char *hostname;
-    char str[1024];
-
-    hostname = "0.0.0.0";
-    portno = 80;
-
-    sockfd = socket(AF_INET, SOCK_DGRAM, 0);
-    if (sockfd < 0) 
-        error("ERROR opening socket");
-
-    server = gethostbyname(hostname);
-    if (server == NULL) {
-        fprintf(stderr,"ERROR, no such host as %s\n", hostname);
-        exit(0);
-    }
-
-    bzero((char *) &serveraddr, sizeof(serveraddr));
-    serveraddr.sin_family = AF_INET;
-    bcopy((char *)server->h_addr, 
-	  (char *)&serveraddr.sin_addr.s_addr, server->h_length);
-    serveraddr.sin_port = htons(portno);
-
     if (argc != 2) {
         usage(argv[0]);
         return 1;
@@ -120,12 +79,7 @@ int main(int argc, char** argv)
     
     double north, east, down;
 
-    bzero(str, BUFSIZE);
-    serverlen = sizeof(serveraddr);
-
-    const auto & seraddr = serveraddr; 
-
-    telemetry.subscribe_position([&conv, &north, &east, &down, &sockfd, &portno, &n, &seraddr, &serverlen, &server, &hostname, &str](Telemetry::Position position) {
+    telemetry.subscribe_position([&conv, &north, &east, &down](Telemetry::Position position) {
         std::cout << position.latitude_deg << "deg" << '\n';
         std::cout << position.longitude_deg << "deg" << '\n';
         std::cout << position.relative_altitude_m << "deg" << '\n';
@@ -133,13 +87,6 @@ int main(int argc, char** argv)
         conv.geodetic2Ned(position.latitude_deg, position.longitude_deg, position.relative_altitude_m, &north, &east, &down);
 
         std::cout<<"north: "<<north<<'m'<<' '<<"east: "<<east<<'m'<<' '<<"down: "<<down<<'m'<<'\n';
-
-        sprintf(str, "north: %fm east: %fm down: %fm", north, east, down);
-
-        n = sendto(sockfd, str, strlen(str), 0, (const struct sockaddr*)&seraddr, serverlen);
-
-        if (n < 0) 
-            error("ERROR");
     });
 
     // Check until vehicle is ready to arm
