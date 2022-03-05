@@ -457,9 +457,9 @@ def main(argv):
 
             log.info(chr(27) + "[2J"+"**** " + str(len(detections)) + " Results ****")
 
-            data, addr = s.recvfrom(1024)
+            data, addr = s.recvfrom(1024)       # 코드 개선 필요
+            
             for detection in detections:
-                
                 label = detection[0]
                 confidence = detection[1]
                 pstring = label+": "+str(np.rint(100 * confidence))+"%"
