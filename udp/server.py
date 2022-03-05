@@ -1,6 +1,6 @@
 import socket, sys
 
-port = 80
+port = 1234
 
 s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
