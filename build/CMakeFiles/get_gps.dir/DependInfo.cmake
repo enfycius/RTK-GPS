@@ -4,7 +4,7 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_CXX
-  "/home/hexk/Downloads/RTK-GPS/get_gps.cpp" "/home/hexk/Downloads/RTK-GPS/build/CMakeFiles/get_gps.dir/get_gps.cpp.o"
+  "/home/com/Documents/rtk-gps/get_gps.cpp" "/home/com/Documents/rtk-gps/build/CMakeFiles/get_gps.dir/get_gps.cpp.o"
   )
 set(CMAKE_CXX_COMPILER_ID "GNU")
 
