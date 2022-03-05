@@ -142,7 +142,6 @@ int main(int argc, char** argv)
             error("ERROR");
     });
 
-    // Check until vehicle is ready to arm
     while (telemetry.health_all_ok() != true) {
         std::cout << "Vehicle is getting ready to arm\n";
         sleep_for(seconds(1));
