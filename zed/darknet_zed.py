@@ -25,6 +25,10 @@ import numpy as np
 import cv2
 import pyzed.sl as sl
 import socket, sys
+import threading
+import time
+
+gps_data = None
 
 port = 1234
 
@@ -38,6 +42,16 @@ s.bind((host, port))
 log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
+def get_data():
+    global gps_data
+    
+    while True:
+        try:
+            gps_data, addr = s.recvfrom(1024)
+            time.sleep(0.2)
+        
+        except Exception:
+            pass
 
 def sample(probs):
     s = sum(probs)
@@ -337,7 +351,6 @@ def generate_color(meta_path):
 
 
 def main(argv):
-
     thresh = 0.25
     darknet_path="../libdarknet/"
     config_path = darknet_path + "cfg/yolov3-tiny.cfg"
@@ -441,7 +454,12 @@ def main(argv):
     log.info("Running...")
 
     key = ''
+    
     while key != 113:  # for 'q' key
+        t = threading.Thread(target=get_data)
+        t.daemon = True
+        t.start()
+
         start_time = time.time() # start time of the loop
         err = cam.grab(runtime)
         if err == sl.ERROR_CODE.SUCCESS:
@@ -456,8 +474,6 @@ def main(argv):
             detections = detect(netMain, metaMain, image, thresh)
 
             log.info(chr(27) + "[2J"+"**** " + str(len(detections)) + " Results ****")
-
-            data, addr = s.recvfrom(1024)       # 코드 개선 필요
             
             for detection in detections:
                 label = detection[0]
@@ -481,7 +497,8 @@ def main(argv):
                 cv2.putText(image, label + " " +  (str(distance) + " m"),
                             (x_coord + (thickness * 4), y_coord + (10 + thickness * 4)),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
-                cv2.putText(image, label + " " + str(data), (x_coord + (thickness * 4), y_coord + (-20 + thickness * 4)),
+
+                cv2.putText(image, label + " " + str(gps_data), (x_coord + (thickness * 4), y_coord + (-20 + thickness * 4)),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
                 cv2.rectangle(image, (x_coord - thickness, y_coord - thickness),
                               (x_coord + x_extent + thickness, y_coord + y_extent + thickness),
