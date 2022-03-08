@@ -114,7 +114,7 @@ int main(int argc, char** argv)
     auto telemetry = Telemetry{system};
     auto action = Action{system};
 
-    const auto set_rate_result = telemetry.set_rate_position(1.0);
+    telemetry.set_rate_position(1.0);
 
     conv.initialize(0.0, 0.0, 0.0);
     
@@ -125,26 +125,23 @@ int main(int argc, char** argv)
 
     const auto & seraddr = serveraddr; 
 
+    while(1) {
     telemetry.subscribe_position([&conv, &north, &east, &down, &sockfd, &portno, &n, &seraddr, &serverlen, &server, &hostname, &str](Telemetry::Position position) {
-        std::cout << position.latitude_deg << "deg" << '\n';
-        std::cout << position.longitude_deg << "deg" << '\n';
-        std::cout << position.relative_altitude_m << "deg" << '\n';
+            std::cout << position.latitude_deg << "deg" << '\n';
+            std::cout << position.longitude_deg << "deg" << '\n';
+            std::cout << position.relative_altitude_m << "deg" << '\n';
 
-        conv.geodetic2Ned(position.latitude_deg, position.longitude_deg, position.relative_altitude_m, &north, &east, &down);
+            conv.geodetic2Ned(position.latitude_deg, position.longitude_deg, position.relative_altitude_m, &north, &east, &down);
 
-        std::cout<<"north: "<<north<<'m'<<' '<<"east: "<<east<<'m'<<' '<<"down: "<<down<<'m'<<'\n';
+            std::cout<<"north: "<<north<<'m'<<' '<<"east: "<<east<<'m'<<' '<<"down: "<<down<<'m'<<'\n';
 
-        sprintf(str, "north: %fm east: %fm down: %fm", north, east, down);
+            sprintf(str, "north: %fm east: %fm down: %fm", north, east, down);
 
-        n = sendto(sockfd, str, strlen(str), 0, (const struct sockaddr*)&seraddr, serverlen);
+            n = sendto(sockfd, str, strlen(str), 0, (const struct sockaddr*)&seraddr, serverlen);
 
-        if (n < 0) 
-            error("ERROR");
-    });
-
-    while (telemetry.health_all_ok() != true) {
-        std::cout << "Vehicle is getting ready to arm\n";
-        sleep_for(seconds(1));
+            if (n < 0) 
+                error("ERROR");
+        });
     }
 
     return 0;
